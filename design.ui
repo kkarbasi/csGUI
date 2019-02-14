@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1112</width>
-    <height>596</height>
+    <width>1103</width>
+    <height>1015</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1103</width>
+    <height>1015</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1103</width>
+    <height>1015</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -52,7 +64,7 @@
       <x>40</x>
       <y>70</y>
       <width>791</width>
-      <height>421</height>
+      <height>821</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -72,6 +84,16 @@
        </rect>
       </property>
      </widget>
+     <widget class="MplWidget" name="plotWidget_2" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>400</y>
+        <width>781</width>
+        <height>371</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -83,9 +105,9 @@
     <property name="geometry">
      <rect>
       <x>850</x>
-      <y>100</y>
+      <y>190</y>
       <width>221</width>
-      <height>181</height>
+      <height>291</height>
      </rect>
     </property>
     <property name="text">
@@ -96,9 +118,9 @@
     <property name="geometry">
      <rect>
       <x>850</x>
-      <y>310</y>
+      <y>490</y>
       <width>221</width>
-      <height>181</height>
+      <height>311</height>
      </rect>
     </property>
     <property name="text">
@@ -109,7 +131,7 @@
     <property name="geometry">
      <rect>
       <x>460</x>
-      <y>500</y>
+      <y>910</y>
       <width>221</width>
       <height>41</height>
      </rect>
@@ -122,7 +144,7 @@
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>500</y>
+      <y>910</y>
       <width>221</width>
       <height>41</height>
      </rect>
@@ -137,7 +159,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1112</width>
+     <width>1103</width>
      <height>22</height>
     </rect>
    </property>
