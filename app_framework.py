@@ -27,7 +27,6 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         self.pushButton_next.clicked.connect(self.handle_next)
         self.pushButton_previous.clicked.connect(self.handle_previous)
 
-
     def save_filename(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()[0]
         if not filename.endswith('pkl'):
@@ -45,6 +44,13 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
                 sss = pickle.load(input, encoding='latin1')
             except TypeError:
                 sss = pickle.load(input)
+        
+        
+        self.cs_indices = sss.cs_indices
+        self.curr_index = 0
+        self.isCS = np.zeros(sss.cs_indices.shape, dtype = 'int16') # 0: no answer | 1: Yes | -1: No 
+        
+        # Prepare plotting parameter
         pre_index_zoomed = int(np.round(0.005 / sss.dt))
         post_index_zoomed = int(np.round(0.01 / sss.dt))
 
@@ -57,14 +63,15 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         self.aligend_cs = np.array([sss.voltage[i - pre_index : i + post_index ] 
             for i in sss.cs_indices])
         
-        self.cs_indices = sss.cs_indices
-        self.curr_index = 0
+        
+        # Plot firt complex spike zoomed in 
         self.t_axis_zoomed = np.arange(-1*pre_index_zoomed, self.aligend_cs_zoomed.shape[1] - pre_index_zoomed)*sss.dt
         self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, self.aligend_cs_zoomed[self.curr_index,:])
         self.plotWidget.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
         self.plotWidget.canvas.ax.set_xlabel('Time (s)')
         self.plotWidget.canvas.draw()
         
+        # Plot first complex spike zoomed out
         self.t_axis = np.arange(-1*pre_index, self.aligend_cs.shape[1] - pre_index)*sss.dt
         self.plotWidget_2.canvas.ax.plot(self.t_axis, self.aligend_cs[self.curr_index,:])
         self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
@@ -75,21 +82,64 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
     def open_new_info_file(self, filename):
         '''
         Opens an output file to save the information about the accepted 
-        or rejected complex spikes.
         '''
-        #self.output = open(filename, 'w')
+        self.output = open(filename, 'w')
         
 
     def handle_yes(self):
-        self.output.write('dasdas')
-        self.output.close()
+        
+        gc.collect()
+        self.isCS[self.curr_index] = 1
+        
+        if self.curr_index < self.cs_indices.size - 1:
+            self.curr_index = self.curr_index + 1
+            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
+            to_plot =  self.aligend_cs[self.curr_index,:]
+            
+            self.plotWidget.canvas.ax.cla()
+            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed)
+            self.plotWidget.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
+            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
+            self.plotWidget.canvas.draw()
+
+            self.plotWidget_2.canvas.ax.cla()
+            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
+            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
+            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
+            self.plotWidget_2.canvas.draw()
+        
+        self.output.write(str(self.isCS.tolist()))
+        self.output.seek(0)
+        #self.output.close()
 
     def handle_no(self):
-        return
+        gc.collect()
+        self.isCS[self.curr_index] = -1
+        if self.curr_index < self.cs_indices.size - 1:
+            self.curr_index = self.curr_index + 1
+            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
+            to_plot =  self.aligend_cs[self.curr_index,:]
+            
+            
+            self.plotWidget.canvas.ax.cla()
+            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed )
+            self.plotWidget.canvas.ax.plot(0, 0 , 'r*')
+            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
+            self.plotWidget.canvas.draw()
+
+            self.plotWidget_2.canvas.ax.cla()
+            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
+            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*')
+            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
+            self.plotWidget_2.canvas.draw()
+
+        self.output.write(str(self.isCS.tolist()))
+        self.output.seek(0)
+        #self.output.close()
 
     def handle_next(self):
         gc.collect() # garbage collection
-        if self.curr_index != self.cs_indices.size-1:
+        if self.curr_index < self.cs_indices.size - 1:
             self.curr_index = self.curr_index + 1
             to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
             to_plot =  self.aligend_cs[self.curr_index,:]
@@ -107,7 +157,8 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
             self.plotWidget_2.canvas.draw()
 
     def handle_previous(self):
-        if self.curr_index != 0:
+        gc.collect() # garbage collection
+        if self.curr_index > 0:
             self.curr_index = self.curr_index - 1
             to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
             to_plot =  self.aligend_cs[self.curr_index,:]
