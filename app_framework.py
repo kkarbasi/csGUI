@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QIntValidator
 import design
 try:
     import cPickle as pickle
@@ -16,6 +17,7 @@ from kaveh.toolbox import find_file
 from kaveh.plots import axvlines
 import os
 import gc
+import csv
 
 class MyApp(QMainWindow, design.Ui_MainWindow):
     def __init__(self):
@@ -26,6 +28,14 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         self.pushButton_notCS.clicked.connect(self.handle_no)
         self.pushButton_next.clicked.connect(self.handle_next)
         self.pushButton_previous.clicked.connect(self.handle_previous)
+        self.lineEdit_goto.returnPressed.connect(self.handle_goto)
+        self.lineEdit_goto.setValidator(QIntValidator())
+
+    def closeEvent(self, event):
+        if hasattr(self, 'output_f'):
+            self.output_f.seek(0)
+            csvwriter = csv.writer(self.output_f, delimiter = ',')
+            csvwriter.writerows(self.isCS)
 
     def save_filename(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()[0]
@@ -48,132 +58,141 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         
         self.cs_indices = sss.cs_indices
         self.curr_index = 0
-        self.isCS = np.zeros(sss.cs_indices.shape, dtype = 'int16') # 0: no answer | 1: Yes | -1: No 
-        
+        self.isCS = np.zeros((sss.cs_indices.size, 2), dtype = self.cs_indices.dtype) # 0: no answer | 1: Yes | -1: No 
+        self.isCS[:,0] = self.cs_indices
+       
+        def pad(some_list, target_len):
+
+            return np.concatenate((some_list[:target_len], [0]*(target_len - len(some_list))))
+
         # Prepare plotting parameter
         pre_index_zoomed = int(np.round(0.005 / sss.dt))
         post_index_zoomed = int(np.round(0.01 / sss.dt))
+        wave_size_zoomed = post_index_zoomed + pre_index_zoomed
 
         pre_index = int(np.round(0.03 / sss.dt))
         post_index = int(np.round(0.04 / sss.dt))
-        
-        self.aligend_cs_zoomed = np.array([sss.voltage[i - pre_index_zoomed : i + post_index_zoomed ] 
+        wave_size = post_index + pre_index
+
+        #print(wave_size) 
+        self.aligend_cs_zoomed = np.array([pad(sss.voltage[i - pre_index_zoomed : i + post_index_zoomed ], wave_size_zoomed) 
             for i in sss.cs_indices])
 
-        self.aligend_cs = np.array([sss.voltage[i - pre_index : i + post_index ] 
+        self.aligend_cs = np.array([pad(sss.voltage[i - pre_index : i + post_index ], wave_size) 
             for i in sss.cs_indices])
+        
+        #self.aligend_cs_zoomed = np.array([sss.voltage[i - pre_index_zoomed : i + post_index_zoomed ] 
+        #    for i in sss.cs_indices])
+
+        #self.aligend_cs = np.array([sss.voltage[i - pre_index : i + post_index ] 
+        #    for i in sss.cs_indices])
+        #print(self.aligend_cs.shape)
         
         
         # Plot firt complex spike zoomed in 
         self.t_axis_zoomed = np.arange(-1*pre_index_zoomed, self.aligend_cs_zoomed.shape[1] - pre_index_zoomed)*sss.dt
-        self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, self.aligend_cs_zoomed[self.curr_index,:])
-        self.plotWidget.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-        self.plotWidget.canvas.ax.set_xlabel('Time (s)')
-        self.plotWidget.canvas.draw()
-        
-        # Plot first complex spike zoomed out
         self.t_axis = np.arange(-1*pre_index, self.aligend_cs.shape[1] - pre_index)*sss.dt
-        self.plotWidget_2.canvas.ax.plot(self.t_axis, self.aligend_cs[self.curr_index,:])
-        self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-        self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
-        self.plotWidget_2.canvas.draw()
-        self.open_new_info_file('./out_test')
-    
-    def open_new_info_file(self, filename):
-        '''
-        Opens an output file to save the information about the accepted 
-        '''
-        self.output = open(filename, 'w')
+        self.update_plots()
+        self.update_labels()
         
+        output_filename = self.filename + '.csv'
+
+        self.open_info_file(output_filename)
+    
+    def open_info_file(self, filename):
+        '''
+        Opens an output file to save the information about the accepted; If not exists, create a new file
+        '''
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                reader = csv.reader(f)
+                csv_content = np.array(list(reader), dtype = self.cs_indices.dtype)  
+            if csv_content.shape == self.isCS.shape:
+                self.isCS = csv_content
+        self.output_f = open(filename, 'w+')
+        
+
+    def handle_goto(self):
+        goto_index = int(self.lineEdit_goto.text())
+        if goto_index < 0:
+            self.curr_index = self.cs_indices.size + goto_index
+        else:
+            self.curr_index = goto_index
+        self.update_plots()
+        self.update_labels()
+
+
 
     def handle_yes(self):
         
         gc.collect()
-        self.isCS[self.curr_index] = 1
+        self.isCS[self.curr_index, 1] = 1
         
         if self.curr_index < self.cs_indices.size - 1:
             self.curr_index = self.curr_index + 1
-            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
-            to_plot =  self.aligend_cs[self.curr_index,:]
-            
-            self.plotWidget.canvas.ax.cla()
-            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed)
-            self.plotWidget.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget.canvas.draw()
-
-            self.plotWidget_2.canvas.ax.cla()
-            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
-            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget_2.canvas.draw()
+            self.update_plots()
+            self.update_labels()
         
-        self.output.write(str(self.isCS.tolist()))
-        self.output.seek(0)
+        self.output_f.seek(0)
+        csvwriter = csv.writer(self.output_f, delimiter = ',')
+        csvwriter.writerows(self.isCS)
+        #self.output.write(str(self.isCS.tolist()))
+        #self.output.seek(0)
         #self.output.close()
 
     def handle_no(self):
         gc.collect()
-        self.isCS[self.curr_index] = -1
+        self.isCS[self.curr_index, 1] = -1
         if self.curr_index < self.cs_indices.size - 1:
             self.curr_index = self.curr_index + 1
-            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
-            to_plot =  self.aligend_cs[self.curr_index,:]
+            self.update_plots()
+            self.update_labels()
             
-            
-            self.plotWidget.canvas.ax.cla()
-            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed )
-            self.plotWidget.canvas.ax.plot(0, 0 , 'r*')
-            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget.canvas.draw()
-
-            self.plotWidget_2.canvas.ax.cla()
-            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
-            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*')
-            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget_2.canvas.draw()
-
-        self.output.write(str(self.isCS.tolist()))
-        self.output.seek(0)
+        self.output_f.seek(0)
+        csvwriter = csv.writer(self.output_f, delimiter = ',')
+        csvwriter.writerows(self.isCS)
+        #self.output.write(str(self.isCS.tolist()))
+        #self.output.write(str(self.isCS.tolist()))
+        #self.output.seek(0)
         #self.output.close()
 
     def handle_next(self):
         gc.collect() # garbage collection
         if self.curr_index < self.cs_indices.size - 1:
             self.curr_index = self.curr_index + 1
-            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
-            to_plot =  self.aligend_cs[self.curr_index,:]
+            self.update_plots()
+            self.update_labels()
             
-            self.plotWidget.canvas.ax.cla()
-            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed)
-            self.plotWidget.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget.canvas.draw()
-
-            self.plotWidget_2.canvas.ax.cla()
-            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
-            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*', alpha = 0.4)
-            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget_2.canvas.draw()
-
     def handle_previous(self):
         gc.collect() # garbage collection
         if self.curr_index > 0:
             self.curr_index = self.curr_index - 1
-            to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
-            to_plot =  self.aligend_cs[self.curr_index,:]
+            self.update_plots()
+            self.update_labels()
             
-            
-            self.plotWidget.canvas.ax.cla()
-            self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, to_plot_zoomed )
-            self.plotWidget.canvas.ax.plot(0, 0 , 'r*')
-            self.plotWidget.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget.canvas.draw()
+    def update_plots(self):
+       
+        self.to_plot_zoomed = self.aligend_cs_zoomed[self.curr_index,:]
+        self.to_plot =  self.aligend_cs[self.curr_index,:]
 
-            self.plotWidget_2.canvas.ax.cla()
-            self.plotWidget_2.canvas.ax.plot(self.t_axis, to_plot)
-            self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*')
-            self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
-            self.plotWidget_2.canvas.draw()
+        self.plotWidget.canvas.ax.cla()
+        self.plotWidget.canvas.ax.plot(self.t_axis_zoomed, self.to_plot_zoomed )
+        self.plotWidget.canvas.ax.plot(0, 0 , 'r*')
+        self.plotWidget.canvas.ax.set_xlabel('Time (s)')
+        self.plotWidget.canvas.draw()
 
+        self.plotWidget_2.canvas.ax.cla()
+        self.plotWidget_2.canvas.ax.plot(self.t_axis, self.to_plot)
+        self.plotWidget_2.canvas.ax.plot(0, 0 , 'r*')
+        self.plotWidget_2.canvas.ax.set_xlabel('Time (s)')
+        self.plotWidget_2.canvas.draw()
+
+    def update_labels(self):
+        if self.isCS[self.curr_index, 1] == 0:
+            self.label_isCS.setText('???')
+        if self.isCS[self.curr_index, 1] == 1:
+            self.label_isCS.setText('YES')
+        if self.isCS[self.curr_index, 1] == -1:
+            self.label_isCS.setText('NO')
+        self.label_spikeindex.setText('{}'.format(self.curr_index))
 
