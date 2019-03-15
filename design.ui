@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1103</width>
+    <width>1600</width>
     <height>1015</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>1103</width>
+    <width>1600</width>
     <height>1015</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1103</width>
+    <width>1600</width>
     <height>1015</height>
    </size>
   </property>
@@ -63,7 +63,7 @@
      <rect>
       <x>40</x>
       <y>70</y>
-      <width>791</width>
+      <width>1301</width>
       <height>821</height>
      </rect>
     </property>
@@ -79,7 +79,7 @@
        <rect>
         <x>0</x>
         <y>10</y>
-        <width>781</width>
+        <width>1291</width>
         <height>371</height>
        </rect>
       </property>
@@ -89,13 +89,16 @@
        <rect>
         <x>0</x>
         <y>400</y>
-        <width>781</width>
+        <width>1291</width>
         <height>371</height>
        </rect>
       </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <attribute name="title">
       <string>Options</string>
      </attribute>
@@ -104,59 +107,59 @@
    <widget class="QPushButton" name="pushButton_isCS">
     <property name="geometry">
      <rect>
-      <x>850</x>
+      <x>1360</x>
       <y>170</y>
       <width>221</width>
       <height>291</height>
      </rect>
     </property>
     <property name="text">
-     <string>YES</string>
+     <string>YES (Q)</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_notCS">
     <property name="geometry">
      <rect>
-      <x>850</x>
+      <x>1360</x>
       <y>510</y>
       <width>221</width>
       <height>291</height>
      </rect>
     </property>
     <property name="text">
-     <string>NO</string>
+     <string>NO (S)</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_next">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>730</x>
       <y>910</y>
       <width>221</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>&gt;&gt;&gt;</string>
+     <string>&gt;&gt;&gt; (')</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_previous">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>480</x>
       <y>910</y>
       <width>221</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>&lt;&lt;&lt;</string>
+     <string>(L) &lt;&lt;&lt;</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>840</x>
+      <x>1350</x>
       <y>850</y>
       <width>81</width>
       <height>17</height>
@@ -169,7 +172,7 @@
    <widget class="QLabel" name="label_spikeindex">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>1440</x>
       <y>840</y>
       <width>151</width>
       <height>31</height>
@@ -185,7 +188,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>880</x>
+      <x>1390</x>
       <y>879</y>
       <width>41</width>
       <height>31</height>
@@ -198,7 +201,7 @@
    <widget class="QLabel" name="label_isCS">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>1440</x>
       <y>880</y>
       <width>151</width>
       <height>31</height>
@@ -214,7 +217,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>876</x>
+      <x>1410</x>
       <y>919</y>
       <width>41</width>
       <height>31</height>
@@ -227,7 +230,7 @@
    <widget class="QLineEdit" name="lineEdit_goto">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>1460</x>
       <y>920</y>
       <width>111</width>
       <height>31</height>
@@ -240,7 +243,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1103</width>
+     <width>1600</width>
      <height>22</height>
     </rect>
    </property>

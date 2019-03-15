@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIntValidator
+from PyQt5.QtCore import Qt
 import design
 try:
     import cPickle as pickle
@@ -36,6 +37,16 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
             self.output_f.seek(0)
             csvwriter = csv.writer(self.output_f, delimiter = ',')
             csvwriter.writerows(self.isCS)
+    
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Q:
+            self.handle_yes()
+        if event.key() == Qt.Key_S:
+            self.handle_no()
+        if event.key() == Qt.Key_L:
+            self.handle_previous()
+        if event.key() == Qt.Key_Apostrophe:
+            self.handle_next()
 
     def save_filename(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()[0]
@@ -66,12 +77,12 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
             return np.concatenate((some_list[:target_len], [0]*(target_len - len(some_list))))
 
         # Prepare plotting parameter
-        pre_index_zoomed = int(np.round(0.005 / sss.dt))
-        post_index_zoomed = int(np.round(0.01 / sss.dt))
+        pre_index_zoomed = int(np.round(0.01 / sss.dt))
+        post_index_zoomed = int(np.round(0.02 / sss.dt))
         wave_size_zoomed = post_index_zoomed + pre_index_zoomed
 
-        pre_index = int(np.round(0.03 / sss.dt))
-        post_index = int(np.round(0.04 / sss.dt))
+        pre_index = int(np.round(0.08 / sss.dt))
+        post_index = int(np.round(0.09 / sss.dt))
         wave_size = post_index + pre_index
 
         #print(wave_size) 
@@ -92,12 +103,12 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         # Plot firt complex spike zoomed in 
         self.t_axis_zoomed = np.arange(-1*pre_index_zoomed, self.aligend_cs_zoomed.shape[1] - pre_index_zoomed)*sss.dt
         self.t_axis = np.arange(-1*pre_index, self.aligend_cs.shape[1] - pre_index)*sss.dt
-        self.update_plots()
-        self.update_labels()
         
         output_filename = self.filename + '.csv'
 
         self.open_info_file(output_filename)
+        self.update_plots()
+        self.update_labels()
     
     def open_info_file(self, filename):
         '''
@@ -109,7 +120,7 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
                 csv_content = np.array(list(reader), dtype = self.cs_indices.dtype)  
             if csv_content.shape == self.isCS.shape:
                 self.isCS = csv_content
-        self.output_f = open(filename, 'w+')
+        self.output_f = open(filename, 'w+', newline='')
         
 
     def handle_goto(self):
