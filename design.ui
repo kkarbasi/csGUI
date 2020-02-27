@@ -134,7 +134,7 @@
     <property name="geometry">
      <rect>
       <x>730</x>
-      <y>910</y>
+      <y>930</y>
       <width>221</width>
       <height>41</height>
      </rect>
@@ -147,7 +147,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>910</y>
+      <y>930</y>
       <width>221</width>
       <height>41</height>
      </rect>
@@ -160,7 +160,7 @@
     <property name="geometry">
      <rect>
       <x>1350</x>
-      <y>850</y>
+      <y>860</y>
       <width>81</width>
       <height>17</height>
      </rect>
@@ -173,7 +173,7 @@
     <property name="geometry">
      <rect>
       <x>1440</x>
-      <y>840</y>
+      <y>850</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -188,8 +188,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1390</x>
-      <y>879</y>
+      <x>590</x>
+      <y>890</y>
       <width>41</width>
       <height>31</height>
      </rect>
@@ -201,11 +201,17 @@
    <widget class="QLabel" name="label_isCS">
     <property name="geometry">
      <rect>
-      <x>1440</x>
-      <y>880</y>
+      <x>640</x>
+      <y>891</y>
       <width>151</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -218,7 +224,7 @@
     <property name="geometry">
      <rect>
       <x>1410</x>
-      <y>919</y>
+      <y>889</y>
       <width>41</width>
       <height>31</height>
      </rect>
@@ -231,10 +237,39 @@
     <property name="geometry">
      <rect>
       <x>1460</x>
-      <y>920</y>
+      <y>890</y>
       <width>111</width>
       <height>31</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>1350</x>
+      <y>820</y>
+      <width>81</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Spike time:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_spiketime">
+    <property name="geometry">
+     <rect>
+      <x>1440</x>
+      <y>810</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

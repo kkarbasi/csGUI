@@ -68,6 +68,7 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         
         
         self.cs_indices = sss.cs_indices
+        self.dt = sss.dt
         self.curr_index = 0
         self.isCS = np.zeros((sss.cs_indices.size, 2), dtype = self.cs_indices.dtype) # 0: no answer | 1: Yes | -1: No 
         self.isCS[:,0] = self.cs_indices
@@ -104,7 +105,9 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
         self.t_axis_zoomed = np.arange(-1*pre_index_zoomed, self.aligend_cs_zoomed.shape[1] - pre_index_zoomed)*sss.dt
         self.t_axis = np.arange(-1*pre_index, self.aligend_cs.shape[1] - pre_index)*sss.dt
         
-        output_filename = self.filename + '.csv'
+        output_filename = self.filename + '.GMM.CS.csv'
+
+        #output_filename = self.filename + '.csv'
 
         self.open_info_file(output_filename)
         self.update_plots()
@@ -118,7 +121,7 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
             with open(filename, 'r') as f:
                 reader = csv.reader(f)
                 csv_content = np.array(list(reader), dtype = self.cs_indices.dtype)  
-            if csv_content.shape == self.isCS.shape:
+            if csv_content.shape != (0,):
                 self.isCS = csv_content
         self.output_f = open(filename, 'w+', newline='')
         
@@ -203,7 +206,10 @@ class MyApp(QMainWindow, design.Ui_MainWindow):
             self.label_isCS.setText('???')
         if self.isCS[self.curr_index, 1] == 1:
             self.label_isCS.setText('YES')
+            self.label_isCS.setStyleSheet('background-color: green')
         if self.isCS[self.curr_index, 1] == -1:
             self.label_isCS.setText('NO')
+            self.label_isCS.setStyleSheet('background-color: red')
         self.label_spikeindex.setText('{}'.format(self.curr_index))
+        self.label_spiketime.setText('{} s'.format(self.cs_indices[self.curr_index]*self.dt))
 
